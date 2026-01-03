@@ -171,7 +171,7 @@ export function ShareDialog({ username, displayName, trigger }: ShareDialogProps
                     </div>
 
                     {/* Native Share (Mobile) */}
-                    {typeof navigator !== 'undefined' && navigator.share && (
+                    {typeof window !== 'undefined' && 'share' in navigator && (
                         <Button
                             onClick={shareNative}
                             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
