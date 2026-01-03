@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ClothingItem } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
+import confetti from 'canvas-confetti'
+import { ExternalLink } from 'lucide-react'
 
 interface ClothingCardProps {
     item: ClothingItem
@@ -14,6 +16,16 @@ export function ClothingCard({ item }: ClothingCardProps) {
 
     const handleClick = async () => {
         setIsClicked(true)
+
+        // Confetti animation
+        const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b']
+        confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: colors,
+            ticks: 100,
+        })
 
         // Track click
         try {
@@ -33,67 +45,71 @@ export function ClothingCard({ item }: ClothingCardProps) {
         }, 150)
     }
 
+    const gradientBorders = [
+        'from-cyan-500 via-purple-500 to-pink-500',
+        'from-purple-500 via-pink-500 to-cyan-500',
+        'from-pink-500 via-cyan-500 to-purple-500',
+        'from-cyan-500 via-blue-500 to-purple-500',
+    ]
+    const randomGradient = gradientBorders[Math.floor(Math.random() * gradientBorders.length)]
+
     return (
         <motion.button
             onClick={handleClick}
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
-            className={`w-full group relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300 ${isClicked ? 'ring-2 ring-cyan-500' : ''
-                }`}
+            className="w-full group relative overflow-hidden rounded-2xl"
         >
-            {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Gradient border effect */}
+            <div className={`absolute inset-0 bg-gradient-to-r ${randomGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm`} />
 
-            <div className="relative flex items-center gap-4 p-4">
-                {/* Product Image */}
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:ring-2 group-hover:ring-cyan-500/30 transition-all">
-                    {item.image_url ? (
-                        <img
-                            src={item.image_url}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <span className="text-2xl">💧</span>
-                    )}
-                </div>
+            <div className={`relative rounded-2xl bg-card/80 backdrop-blur border-2 ${isClicked ? `border-transparent bg-gradient-to-r ${randomGradient} p-[2px]` : 'border-border/50 group-hover:border-transparent'} transition-all duration-300`}>
+                {isClicked && <div className="absolute inset-[2px] bg-card rounded-2xl" />}
 
-                {/* Details */}
-                <div className="flex-1 text-left min-w-0">
-                    <h3 className="font-semibold truncate group-hover:text-cyan-400 transition-colors">
-                        {item.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        {item.brand && <span>{item.brand}</span>}
-                        {item.brand && item.price && <span>•</span>}
-                        {item.price && (
-                            <span className="font-medium text-foreground">
-                                ${item.price.toFixed(2)}
-                            </span>
-                        )}
+                <div className="relative">
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-purple-500/10 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+
+                    <div className="relative flex items-center gap-4 p-4">
+                        {/* Product Image */}
+                        <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500/30 via-purple-500/30 to-pink-500/30 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300 ring-2 ring-transparent group-hover:ring-white/20">
+                            {item.image_url ? (
+                                <img
+                                    src={item.image_url}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span className="text-3xl">💧</span>
+                            )}
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 text-left min-w-0">
+                            <h3 className="font-bold text-lg truncate bg-gradient-to-r from-foreground to-foreground group-hover:from-cyan-400 group-hover:via-purple-400 group-hover:to-pink-400 bg-clip-text transition-all duration-300">
+                                {item.title}
+                            </h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+                                {item.brand && <span className="font-medium">{item.brand}</span>}
+                                {item.brand && item.price && <span>•</span>}
+                                {item.price && (
+                                    <span className="font-bold text-foreground bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                        ${item.price.toFixed(2)}
+                                    </span>
+                                )}
+                            </div>
+                            {item.category && (
+                                <span className="inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 text-cyan-400 border border-cyan-500/30">
+                                    {item.category}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Arrow */}
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 flex items-center justify-center group-hover:from-cyan-500 group-hover:to-purple-500 group-hover:text-white transition-all duration-300 group-hover:shadow-lg group-hover:shadow-purple-500/50">
+                            <ExternalLink className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        </div>
                     </div>
-                    {item.category && (
-                        <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                            {item.category}
-                        </span>
-                    )}
-                </div>
-
-                {/* Arrow */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white transition-all">
-                    <svg
-                        className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
                 </div>
             </div>
         </motion.button>
